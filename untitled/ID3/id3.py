@@ -55,14 +55,14 @@ class ID3(object):
                 else:
                     self.instancias.append(row)
                     if self.classes.has_key(row[len(self.attList)-1]):
-                        self.classes[row[len(self.attList) - 1]]+=1
+                        self.classes[row[len(self.attList) - 1]] += 1
                     else:
                         self.classes[row[len(self.attList) - 1]] = 1
                     k = 0
                     while k < len(self.attList)-1:
-                        dic=self.repeticionesValorAtr[self.attList[k]]
+                        dic = self.repeticionesValorAtr[self.attList[k]]
                         if dic.has_key(row[k]):
-                            dic[row[k]]+=1
+                            dic[row[k]] += 1
                         else:
                             dic[row[k]] = 1
                         t = Tupla(row[k],row[len(self.attList)-1],1)
@@ -89,17 +89,19 @@ class ID3(object):
         atributo = ''
         for key in self.classes:
             aux = float(self.classes[key])/self.n_instancias
-            eInicial += math.fabs(aux)*math.log(aux)
+            eInicial += math.fabs(aux*math.log(aux))
 
-        auxiliar = float(0)
+
         for key in self.valoresAtts:
-            if lista.count(key) != 0:
-                for value in self.valoresAtts[key]:
-                    aux = dict(self.repeticionesValorAtr[key])
-                    n_instancias_attr =aux[value.att]
-                    auxiliar += float(value.rep)/n_instancias_attr+math.fabs(math.log(float(value.rep)/n_instancias_attr))
+            if key != 'class':
+                auxiliar = float(0)
+                if lista.count(key) != 0:
+                    for value in self.valoresAtts[key]:
+                        aux = dict(self.repeticionesValorAtr[key])
+                        n_instancias_attr =aux[value.att]
+                        auxiliar += (float(n_instancias_attr)/self.n_instancias)*(float(value.rep)/n_instancias_attr+math.fabs(math.log(float(value.rep)/n_instancias_attr)))
                     if (eTemporal > auxiliar) | (eTemporal == 0):
-                        eTemporal = aux
+                        eTemporal = auxiliar
                         atributo = key
         return atributo
 
@@ -119,19 +121,26 @@ class ID3(object):
     def id3(self, conjunto, attList):
         previous = 0
         cp = ''
-        for elem in self.classes:
-            if previous < self.classes[elem]:
-                previous = self.classes[elem]
-                cp = elem
-        for instancia in self.instancias:
+        tabla = dict()
+        for elem in conjunto:
+            if tabla.has_key(elem[len(self.attList)-1]):
+                tabla[elem[len(self.attList)-1]] += 1
+            else:
+                tabla[elem[len(self.attList) - 1]] = 1
+        claseValorMasRepetido = max(tabla.values())
+        for key in tabla:
+            if tabla[key] == claseValorMasRepetido:
+                cp = key
+
+        for instancia in conjunto:
             if (instancia[len(attList)-1] == cp) & (previous == self.n_instancias):
                 hoja = Nodo(cp)
                 hoja.isHoja = True
-                return cp
+                return hoja
             elif len(attList) == 0:
                 hoja = Nodo(cp)
                 hoja.isHoja = True
-                return cp
+                return hoja
             a = self.selecattribute(conjunto,attList)
             nodo = Nodo(a)
             valores = self.repeticionesValorAtr[a].keys()
@@ -172,7 +181,8 @@ class ID3(object):
                     auxArbol = self.buscarClase(auxArbol, instancia[auxArbol.attr])
                 k+=1
 
-        print "Clase predicha: "+auxArbol
+        print "Clase predicha: "+auxArbol.attr
+        return auxArbol.attr
 
 
     def test(self, fichero):
@@ -188,15 +198,31 @@ class ID3(object):
             for row in reader:
                 if i == 0:
                     attList = row
+                    auxDict = dict()
                     for elem in attList:
                         valoresAtts[elem] = list()
+                        auxDict[elem] = ''
                     i = i + 1
                 else:
-                    instancia = row
-                    self.clasifica(instancia)
+                    auxDict = dict()
+                    j = 0
+                    while j < (len(attList)-1):
+                        auxDict[attList[j]] = row[j]
+                        j = j+1
+                    print auxDict
+                    print "--"+row[len(attList)-1]
+                    clase = self.clasifica(auxDict)
+                    print "Clase predicha: "+clase
+                    if clase == row[len(attList)-1]:
+                        aciertos+=1
+                        print "ACIERTO"
+                    else:
+                        fallos+=1
+                        print  "FALLO"
 
     def save_tree(self, fichero):
         pass
 
 id3 = ID3("train.data")
 id3.clasifica({'season' : 'winter','wind' : 'high', 'day' : 'weekday', 'rain' : 'heavy'})
+id3.test("test.data")

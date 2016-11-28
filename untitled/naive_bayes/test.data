@@ -1,6 +1,6 @@
 day,season,wind,rain,class
 weekday,winter,none,slight,on time
 weekday,autumn,normal,none,very late
-saturday,spring,high,heavy,cancelled
+weekday,winter,none,slight,on time
 saturday,autumn,high,slight,on time
 saturday,winter,normal,none,late

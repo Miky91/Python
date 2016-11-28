@@ -33,6 +33,7 @@ class NaiveBayes(object):
             self.prob = list()
             #valores de clase
             self.classes = list()
+            t_perClass = dict()
             i = 0
             #lista de valores de tuplas
             nvaloresAtts = dict()
@@ -50,12 +51,15 @@ class NaiveBayes(object):
                     for elem in attList:
                         nvaloresAtts[elem] = 0
                         valoresAtts[elem] = list()
-
                 else:
                     k = 0
                     if self.classes.count(row[len(attList)-1]) == 0:
                         self.classes.append(row[len(attList)-1])
+                        t_perClass[row[len(attList)-1]] = 1
+                    else:
+                        t_perClass[row[len(attList) - 1]] += 1
                     while k < len(attList):
+
                         if tuplasRepetidas.has_key(row[k]+" "+attList[k]):
                             auxList = list(tuplasRepetidas[row[k]+" "+attList[k]])
                             encontrado = False
@@ -107,7 +111,7 @@ class NaiveBayes(object):
             for elem in tuplasRepetidas:
                 aux = str(elem).split(" ")
                 for valor in tuplasRepetidas[elem]:
-                    probabilidad = Probabilidad(aux[0], valor.clase, float(valor.rep+smooth)/(n_tuplas+smooth*nvaloresAtts[aux[1]]))
+                    probabilidad = Probabilidad(aux[0], valor.clase, float(valor.rep+smooth)/(t_perClass[valor.clase]+smooth*nvaloresAtts[aux[1]]))
                     self.prob.append(probabilidad)
 
 

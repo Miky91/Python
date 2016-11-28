@@ -1,0 +1,5 @@
+day,season,wind,rain,class
+weekday,winter,none,none,on time
+weekday,autumn,normal,none,very late
+saturday,spring,high,none,cancelled
+saturday,winter,normal,none,late
