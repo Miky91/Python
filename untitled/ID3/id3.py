@@ -1,8 +1,17 @@
 # Insertar aqui la cabecera
 
 
+#Miguel Andres Herrero y Viktor Jacynycz Garcia declaramos que esta solucion es fruto exclusivamente
+#  de nuestro trabajo personal.No hemos sido ayudados por ninguna otra persona ni hemos obtenido
+# la solucion de fuentes externas, y tampoco hemos compartido nuestra solucion con nadie. Declaramos
+# ademas que no hemos realizado de manera deshonesta ninguna otra actividad que pueda mejorar nuestros
+#  resultados ni perjudicar los resultados de los demas.
 import csv
 import math
+import os.path
+
+
+
 
 class Nodo(object):
     def __init__(self,attribute):
@@ -212,7 +221,7 @@ class ID3(object):
                     print auxDict
                     print "--"+row[len(attList)-1]
                     clase = self.clasifica(auxDict)
-                    print "Clase predicha: "+clase
+#                    print "Clase predicha: "+clase
                     if clase == row[len(attList)-1]:
                         aciertos+=1
                         print "ACIERTO"
@@ -220,9 +229,48 @@ class ID3(object):
                         fallos+=1
                         print  "FALLO"
 
+
+    def buscarHijos(self,auxArbol,csvfile,aristas,atributos, hashtable):
+
+        i = 1
+       # if self.attList.count(auxArbol.attr) > 0:  # busco si es un valor de cabecera
+        if auxArbol.isHoja:
+            csvfile.write('"' +auxArbol.attr + '"' + " [label = " + '"' + auxArbol.attr+ '"' + "];\n")
+            atributos[auxArbol.attr] += 1
+        else:
+            csvfile.write('"' + auxArbol.attr  + '"' + " [label = " + '"' + auxArbol.attr+ '"' + "," + "shape = " + "box" + "];\n")
+            atributos[auxArbol.attr] += 1
+            for elem in auxArbol.list:
+                if not hashtable.has_key('"' + auxArbol.attr + '"' + " -> " +  '"' + elem[0].attr + '"' + " [label= " + '"' + elem[1] + '"' + "];\n"):
+                    aristas.append('"' + auxArbol.attr + '"' + " -> " +  '"' + elem[0].attr + '"' + " [label= " + '"' + elem[1] + '"' + "];\n")
+                    hashtable['"' + auxArbol.attr + '"' + " -> " +  '"' + elem[0].attr + '"' + " [label= " + '"' + elem[1] + '"' + "];\n"] = 1
+                i += 1
+            for elem in auxArbol.list:
+                self.buscarHijos(elem[0], csvfile, aristas,atributos, hashtable)
+
+
     def save_tree(self, fichero):
-        pass
+
+        with open(fichero, 'w') as csvfile:
+            csvfile.seek(0)
+            csvfile.write("digraph tree {\n")
+            #for nodo in self.arbol:
+            auxArbol = self.arbol
+            aristas = list()
+            atributos = dict()
+            hashtable = dict()
+            for key in self.attList:
+                atributos[key] = 1
+            for clase in self.classes:
+                atributos[clase] = 1
+            self.buscarHijos(auxArbol,csvfile,aristas,atributos, hashtable)
+            for arista in aristas:
+                csvfile.write(arista)
+          #   for nodo in auxArbol:#nodo.list:
+            csvfile.write("}")
+
 
 id3 = ID3("train.data")
 id3.clasifica({'season' : 'winter','wind' : 'high', 'day' : 'weekday', 'rain' : 'heavy'})
 id3.test("test.data")
+id3.save_tree("arbol.dot")
