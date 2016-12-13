@@ -22,7 +22,6 @@ def usuario_peliculas(user_id, n):
 # varios tipos de pelicula ('gustos') a la vez.
 # >>> usuarios_gustos(  ['terror', 'comedia'], 5  )
 def usuarios_gustos(gustos, n):
-
     for post in db.usuarios.find({'gustos' : {'$all': gustos}}).limit(n):
         print post['_id']+' '+post['nombre']+' '+post['apellido1']+' '+post['apellido2']
 
@@ -43,9 +42,8 @@ def usuarios_via_num(tipo_via, numero):
 # 5. _id de usuario de un determinado sexo y edad en un rango
 # >>> usuario_sexo_edad('M', 50, 80)
 def usuario_sexo_edad(sexo, edad_min, edad_max):
-    for post in db.usuarios.find({'sexo': sexo}, {'edad': {'$lt' :edad_max, 'gt' : edad_min}}):
-        print post['direccion']['piso']
-
+    for post in db.usuarios.find({'edad': {'$lt':edad_max, '$gt': edad_min}} , {'sexo': sexo} ):
+        print post['_id']
 
 # 6. Nombre, apellido1 y apellido2 de los usuarios cuyos apellidos coinciden,
 # ordenado por edad ascendente
@@ -57,20 +55,28 @@ def usuarios_apellidos():
 # un prefijo
 # >>> pelicula_prefijo( 'Yol' )
 def pelicula_prefijo(prefijo):
-    pass
-
+    st = '^'+prefijo
+    for post in db.peliculas.find({'director': {'$regex': st}}):
+        print post['titulo']
 
 # 8.- _id de usuarios con exactamente 'n' gustos cinematograficos, ordenados por
 # edad descendente
 # >>> usuarios_gustos_numero( 6 )
 def usuarios_gustos_numero(n):
-    pass
-
+    for post in db.usuarios.find().sort('edad', pymongo.DESCENDING):
+        i = 0
+        arr = post['gustos']
+        if len(arr) == n:
+            print post['_id']
 
 # 9.- usuarios que vieron una determinada pelicula en un periodo concreto
 # >>> usuarios_vieron_pelicula( '583ef650323e9572e2812680', '2015-01-01', '2016-12-31' )
 def usuarios_vieron_pelicula(id_pelicula, inicio, fin):
-    pass
+    for post in db.usuarios.find():
+        for peli in post['visualizaciones']:
+            if id_pelicula == peli['_id']:
+                if (inicio < peli['fecha']) & (peli['fecha'] < fin):
+                    print post
 
 
 # Connection to Mongo DB
@@ -81,8 +87,12 @@ except pymongo.errors.ConnectionFailure, e:
     print "Could not connect to MongoDB: %s" % e
 db = client.sgdi_pr3
 
-usuario_peliculas('fernandonoguera', 3)
-usuarios_gustos(['terror','comedia'],3)
-num_peliculas('Eslovaquia')
-usuarios_via_num('Calle',9)
-usuario_sexo_edad('M',20,80)
+usuario_peliculas('fernandonoguera', 3)     #chachi
+#usuarios_gustos(['terror','comedia'],3)    #chachi
+num_peliculas('Eslovaquia') #chachi
+#usuarios_via_num('Calle',9)
+#usuario_sexo_edad('M',20,80)   #chachi
+#pelicula_prefijo('Yol')    #chachi
+#usuarios_gustos_numero(3)    #chachi
+usuarios_vieron_pelicula('583ef650323e9572e2812905', '2002-03-12', '2002-03-17')
+
