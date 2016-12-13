@@ -215,6 +215,7 @@ class ID3(object):
                 else:
                     auxDict = dict()
                     j = 0
+
                     while j < (len(attList)-1):
                         auxDict[attList[j]] = row[j]
                         j = j+1
@@ -227,8 +228,10 @@ class ID3(object):
                         print "ACIERTO"
                     else:
                         fallos+=1
-                        print  "FALLO"
-
+                        print "FALLO"
+            print "ACIERTOS: "+str(aciertos)
+            print "FALLOS: "+str(fallos)
+            print "TASA: "+str(float(aciertos)/(fallos+aciertos))
 
     def buscarHijos(self,auxArbol,csvfile,aristas,atributos, hashtable):
 
@@ -271,6 +274,6 @@ class ID3(object):
 
 
 id3 = ID3("train.data")
-id3.clasifica({'season' : 'winter','wind' : 'high', 'day' : 'weekday', 'rain' : 'heavy'})
+#id3.clasifica({'season' : 'winter','wind' : 'high', 'day' : 'weekday', 'rain' : 'heavy'})
 id3.test("test.data")
 id3.save_tree("arbol.dot")
